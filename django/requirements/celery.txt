@@ -1,0 +1,5 @@
+-r common.txt
+celery==5.0.4
+watchdog==1.0.1
+pyyaml==5.3.1
+argh==0.26.2 

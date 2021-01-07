@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  django:
+    build:
+      context: django
+      target: django
+    volumes:
+      - ./django:/app
+    environment:
+      - STAGE=development
+    env_file:
+      - env/django.env
+      - env/rabbit.env
+      - env/postgres.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbit
+      - postgres
+
+  celery:
+    build:
+      context: django
+      target: celery
+    volumes:
+      - ./django:/app
+    environment:
+      - STAGE=development
+    env_file:
+      - env/django.env
+      - env/rabbit.env
+    depends_on:
+      - django
+      - rabbit
+
+  rabbit:
+    image: rabbitmq:3.8.9-management-alpine
+    env_file:
+      - env/rabbit.env
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  flower:
+    image: mher/flower:0.9.5
+    env_file:
+      - env/flower.env
+    ports:
+      - "5555:5555"
+    depends_on:
+      - rabbit
+
+  postgres:
+    image: postgres:13.1-alpine
+    env_file:
+      - env/postgres.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+
+volumes:
+  pgdata:
